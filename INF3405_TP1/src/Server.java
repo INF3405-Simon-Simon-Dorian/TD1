@@ -15,7 +15,7 @@ public class Server
 		
 		// Adresse et port du serveur
 		
-		String serverAddress = "127.0.0.1";
+		String serverAddress = "10.200.51.51";
 		int serverPort = 5000;
 		
 		// Création d'une connexion avec les clients
