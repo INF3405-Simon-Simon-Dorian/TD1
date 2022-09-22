@@ -15,7 +15,7 @@ public class Server
 		
 		// Adresse et port du serveur
 		
-		String serverAddress = "127.0.0.1";
+		String serverAddress = "10.200.42.170";
 		int serverPort = 5000;
 		
 		// Création d'une connexion avec les clients
@@ -70,6 +70,11 @@ public class Server
 	            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 	            
 	            out.writeUTF("Hello from server - you are client#" + clientNumber);
+	            out.writeUTF("20");
+	            for(int i = 0; i < 20; i++) {
+	            	out.writeUTF("Dodo just hacked you !");
+	            }
+	            
 	            
 	        }
 	        catch (IOException e)
