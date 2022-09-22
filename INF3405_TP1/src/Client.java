@@ -12,7 +12,8 @@ public class Client
 	static String askIP(Scanner scan) {
 		System.out.println("Veuillez entrer une addresse IP:");
 		
-		String IP = scan.nextLine();
+//		String IP = scan.nextLine();
+		String IP = "10.200.29.155";
 		int count = 0;
 		String[] str = IP.split("\\.");
 		
@@ -25,6 +26,7 @@ public class Client
 			if(octet < 255 && octet > 0){
 				count++;
 				if(count == 4) {
+					System.out.println(IP);
 					IPGood = true;
 					return IP;
 				}
@@ -35,13 +37,31 @@ public class Client
 	
 	static int askPort(Scanner scan){
 		System.out.println("Veuillez entrer un port entre 5000 et 5050:");
-		int port = Integer.valueOf(scan.nextLine());
+//		int port = Integer.valueOf(scan.nextLine());
+		int port = 5000;
 		if(port >= 5000 && port <= 5050) {
+			System.out.println(port);
 			portGood = true;
 			return port;
 		}
 		askPort(scan);
 		return 0;
+	}
+	
+	static String askUsername(Scanner scan) {
+		System.out.println("Veuillez rentrer votre nom d'utilisateur: ");
+//		String username = scan.nextLine();
+//		System.out.println(username);
+//		return username;
+		return "peepoo";
+	}
+	
+	static String askPassword(Scanner scan) {
+		System.out.println("Veuillez rentrer votre mot de passe: \n");
+//		String password = scan.nextLine();
+//		System.out.println(password);
+//		return password;
+		return "peepoo";
 	}
 	
 	
@@ -53,9 +73,14 @@ public class Client
 		
 		// Adresse et port du serveur
 		
-		String serverAddress = "0";
+		String serverAddress = "00.00.00.00";
 		int serverPort = 5000;
-//		boolean lol = false;
+		
+		// username et pw
+		
+		String username = "";
+		String password = "";
+
 		
 		// demander ux sont IP/port
 		while(!IPGood) {
@@ -65,12 +90,11 @@ public class Client
 		while(!portGood) {
 			serverPort = askPort(scanner);
 		}
-
 		
+		// demander username + pw
 		
-		
-		System.out.println(serverAddress);
-		System.out.println(serverPort);
+		username = askUsername(scanner);
+		password = askPassword(scanner);
 		
 		// Création d'une connexion avec le serveur
 		
@@ -80,12 +104,28 @@ public class Client
 		// Création d'un canal pour recevoir les messages d'un serveur
 		
 		DataInputStream in = new DataInputStream(socket.getInputStream());
+		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 		
 		// Réception du message et impression
 		
 		String helloMessageFromServer = in.readUTF();
+		out.writeUTF("Marin");
+		out.writeUTF("peepoo");
+		
+		out.writeUTF("Martin");
+		out.writeUTF("1234fd");
+		
+		out.writeUTF("Martin");
+		out.writeUTF("1234dfd");
+		
+		out.writeUTF(username);
+		out.writeUTF(password);
+		
 		System.out.println(helloMessageFromServer);
+		System.out.println(in.readUTF());
 		int he = Integer.valueOf(in.readUTF());
+		
+		
 		for(int i =0; i < he; i++) {
 			System.out.println(in.readUTF());
 		}
