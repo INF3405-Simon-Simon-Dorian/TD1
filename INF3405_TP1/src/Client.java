@@ -12,8 +12,8 @@ public class Client
 	static String askIP(Scanner scan) {
 		System.out.println("Veuillez entrer une addresse IP:");
 		
-//		String IP = scan.nextLine();
-		String IP = "10.200.29.155";
+		String IP = scan.nextLine();
+//		String IP = "10.200.29.155";
 		int count = 0;
 		String[] str = IP.split("\\.");
 		
@@ -37,8 +37,8 @@ public class Client
 	
 	static int askPort(Scanner scan){
 		System.out.println("Veuillez entrer un port entre 5000 et 5050:");
-//		int port = Integer.valueOf(scan.nextLine());
-		int port = 5000;
+		int port = Integer.valueOf(scan.nextLine());
+//		int port = 5000;
 		if(port >= 5000 && port <= 5050) {
 			System.out.println(port);
 			portGood = true;
@@ -50,18 +50,18 @@ public class Client
 	
 	static String askUsername(Scanner scan) {
 		System.out.println("Veuillez rentrer votre nom d'utilisateur: ");
-//		String username = scan.nextLine();
+		String username = scan.nextLine();
 //		System.out.println(username);
-//		return username;
-		return "peepoo";
+		return username;
+//		return "peepoo";
 	}
 	
 	static String askPassword(Scanner scan) {
 		System.out.println("Veuillez rentrer votre mot de passe: \n");
-//		String password = scan.nextLine();
+		String password = scan.nextLine();
 //		System.out.println(password);
-//		return password;
-		return "peepoo";
+		return password;
+//		return "peepoo";
 	}
 	
 	
@@ -109,15 +109,7 @@ public class Client
 		// Réception du message et impression
 		
 		String helloMessageFromServer = in.readUTF();
-		out.writeUTF("Marin");
-		out.writeUTF("peepoo");
-		
-		out.writeUTF("Martin");
-		out.writeUTF("1234fd");
-		
-		out.writeUTF("Martin");
-		out.writeUTF("1234dfd");
-		
+
 		out.writeUTF(username);
 		out.writeUTF(password);
 		
@@ -126,9 +118,16 @@ public class Client
 		int he = Integer.valueOf(in.readUTF());
 		
 		
-		for(int i =0; i < he; i++) {
-			System.out.println(in.readUTF());
-		}
+//		for(int i =0; i < he; i++) {
+//			System.out.println(in.readUTF());
+//		}
+		String line;
+		
+		while ((line = in.readUTF()) != null) {
+            out.writeUTF(line);
+         	System.out.println(line);
+            
+         }
 		
 		// Fermeture de la connexion avec le serveur
 		

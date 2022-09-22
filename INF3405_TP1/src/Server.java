@@ -5,7 +5,49 @@ import java.util.*;
 
 public class Server
 {
+	static boolean portGood = false;
+	static boolean IPGood = false;
+	
 	private static ServerSocket listener;
+	
+	static String askIP(Scanner scan) {
+		System.out.println("Veuillez entrer une addresse IP:");
+		
+		String IP = scan.nextLine();
+//		String IP = "10.200.29.155";
+		int count = 0;
+		String[] str = IP.split("\\.");
+		
+		if(str.length != 4) {
+			return "0.0.0.0";
+		}
+		for(String a: str) {
+			int octet = Integer.valueOf(a);
+			
+			if(octet < 255 && octet > 0){
+				count++;
+				if(count == 4) {
+					System.out.println(IP);
+					IPGood = true;
+					return IP;
+				}
+			}
+		}
+		return "0.0.0.0";
+	}
+	
+	static int askPort(Scanner scan){
+		System.out.println("Veuillez entrer un port entre 5000 et 5050:");
+		int port = Integer.valueOf(scan.nextLine());
+//		int port = 5000;
+		if(port >= 5000 && port <= 5050) {
+			System.out.println(port);
+			portGood = true;
+			return port;
+		}
+		askPort(scan);
+		return 0;
+	}
 	
 
 	// Application Serveur
@@ -18,9 +60,20 @@ public class Server
 		
 		// Adresse et port du serveur
 		
-		String serverAddress = "10.200.29.155";
-		int serverPort = 5000;
+//		String serverAddress = "10.200.29.155";
+		String serverAddress = "0.0.0.0";
+//		int serverPort = 5000;
+		int serverPort = 0; 
 		
+		Scanner scanner = new Scanner(System.in);
+		
+		while(!IPGood) {
+			serverAddress = askIP(scanner);
+		}
+		
+		while(!portGood) {
+			serverPort = askPort(scanner);
+		}
 		// Création d'une connexion avec les clients
 		
 		listener = new ServerSocket();
