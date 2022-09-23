@@ -13,7 +13,6 @@ public class Client
 		System.out.println("Veuillez entrer une addresse IP:");
 		
 		String IP = scan.nextLine();
-//		String IP = "10.200.29.155";
 		int count = 0;
 		String[] str = IP.split("\\.");
 		
@@ -38,7 +37,6 @@ public class Client
 	static int askPort(Scanner scan){
 		System.out.println("Veuillez entrer un port entre 5000 et 5050:");
 		int port = Integer.valueOf(scan.nextLine());
-//		int port = 5000;
 		if(port >= 5000 && port <= 5050) {
 			System.out.println(port);
 			portGood = true;
@@ -51,17 +49,13 @@ public class Client
 	static String askUsername(Scanner scan) {
 		System.out.println("Veuillez rentrer votre nom d'utilisateur: ");
 		String username = scan.nextLine();
-//		System.out.println(username);
 		return username;
-//		return "peepoo";
 	}
 	
 	static String askPassword(Scanner scan) {
 		System.out.println("Veuillez rentrer votre mot de passe: \n");
 		String password = scan.nextLine();
-//		System.out.println(password);
 		return password;
-//		return "peepoo";
 	}
 	
 	
@@ -73,7 +67,7 @@ public class Client
 		
 		// Adresse et port du serveur
 		
-		String serverAddress = "00.00.00.00";
+		String serverAddress = "0.0.0.0";
 		int serverPort = 5000;
 		
 		// username et pw
@@ -114,20 +108,10 @@ public class Client
 		out.writeUTF(password);
 		
 		System.out.println(helloMessageFromServer);
-		System.out.println(in.readUTF());
-		int he = Integer.valueOf(in.readUTF());
 		
+		String connexionMessage = in.readUTF();
+		System.out.println(connexionMessage);
 		
-//		for(int i =0; i < he; i++) {
-//			System.out.println(in.readUTF());
-//		}
-		String line;
-		
-		while ((line = in.readUTF()) != null) {
-            out.writeUTF(line);
-         	System.out.println(line);
-            
-         }
 		
 		// Fermeture de la connexion avec le serveur
 		

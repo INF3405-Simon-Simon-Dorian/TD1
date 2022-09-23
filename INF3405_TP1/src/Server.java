@@ -5,16 +5,17 @@ import java.util.*;
 
 public class Server
 {
+	private static ServerSocket listener;
+	
 	static boolean portGood = false;
 	static boolean IPGood = false;
-	
-	private static ServerSocket listener;
+
+	// Application Serveur
 	
 	static String askIP(Scanner scan) {
 		System.out.println("Veuillez entrer une addresse IP:");
 		
 		String IP = scan.nextLine();
-//		String IP = "10.200.29.155";
 		int count = 0;
 		String[] str = IP.split("\\.");
 		
@@ -39,7 +40,6 @@ public class Server
 	static int askPort(Scanner scan){
 		System.out.println("Veuillez entrer un port entre 5000 et 5050:");
 		int port = Integer.valueOf(scan.nextLine());
-//		int port = 5000;
 		if(port >= 5000 && port <= 5050) {
 			System.out.println(port);
 			portGood = true;
@@ -49,9 +49,6 @@ public class Server
 		return 0;
 	}
 	
-
-	// Application Serveur
-	
 	public static void main(String[] args) throws Exception
 	{
 		// Compteur de connexion
@@ -60,21 +57,20 @@ public class Server
 		
 		// Adresse et port du serveur
 		
-//		String serverAddress = "10.200.29.155";
-		String serverAddress = "0.0.0.0";
-//		int serverPort = 5000;
-		int serverPort = 0; 
+		String serverAddress = "10.200.42.170";
+		int serverPort = 5000;
+		
+		// Création d'une connexion avec les clients
 		
 		Scanner scanner = new Scanner(System.in);
-		
+
 		while(!IPGood) {
 			serverAddress = askIP(scanner);
 		}
-		
+
 		while(!portGood) {
 			serverPort = askPort(scanner);
 		}
-		// Création d'une connexion avec les clients
 		
 		listener = new ServerSocket();
 		listener.setReuseAddress(true);
@@ -113,6 +109,7 @@ public class Server
 		// creer un hashmap pour les usernames / mdp
 		
 		HashMap<String, String> clientData = new HashMap<String, String>();
+        HashMap<String, String> database = new HashMap<String, String>();
 		
 	    public ClientHandler(Socket socket, int clientNumber)
 	    {
@@ -122,6 +119,15 @@ public class Server
 	        System.out.println("New connection with client#" + clientNumber + " at" + socket);
 	        
 	        
+	    }
+	    
+	    public boolean checkUser(String username, String password) {
+	    	if(database.containsKey(username)) {
+	    		if(database.get(username).equals(password)) {
+	    			return true;
+	    		}
+	    	}
+	    	return false;
 	    }
 	    
 	    public void run()
@@ -134,41 +140,30 @@ public class Server
 	            out.writeUTF("Hello from server - you are client#" + clientNumber);
 
 	            
-	            
-	            
-	            
+	            // TODO: creer le fichier si non-existant
+	            BufferedReader bf = new BufferedReader(new FileReader("database.txt"));
+               
+                // read entire line as string
+                String line = bf.readLine();
+               
+                // checking for end of file
+                while (line != null) {
+                	String[] arr = line.split(",");
+                	database.put(arr[0], arr[1]);
+                    line = bf.readLine();
+                }
+                
+                bf.close();
+	               
 	            String username = in.readUTF();
 	            String password = in.readUTF();
 	            
-	            String line;
+	            if(checkUser(username, password))
+	            	out.writeUTF("Tu as bien un compte");
+	            else
+	            	out.writeUTF("Tu es nouveau");
+
 	            
-	            while ((line = in.readUTF()) != null) {
-//	               out.writeUTF(line);
-	            	System.out.println(line);
-	               
-	            }
-	            
-	            
-	            clientData.put("peepoo", "peepoo");
-	            
-	            if(clientData.isEmpty()) {
-	            	clientData.put(username, password);
-	            	out.writeUTF("Account created under name: " + username);
-	            }
-	            else{
-	            	if(clientData.containsKey(username)) {
-	            		if(clientData.get(username) == password) {
-	            		out.writeUTF("account validated");
-	            	}
-	            	else {
-	            		out.writeUTF("Invalid username or password.");
-	            	}
-	            }
-	            
-	            System.out.println("The username that you have entered is:" + username + "\n" + "The password is: " + password);
-	            
-	            
-	            }
 	        }
 	        catch (IOException e)
 	        {
@@ -180,7 +175,6 @@ public class Server
 	        {
 	            try
 	            {
-//	            	socket.setKeepAlive(isAlive());
 	                socket.close();
 	            }
 	            catch(IOException e)
