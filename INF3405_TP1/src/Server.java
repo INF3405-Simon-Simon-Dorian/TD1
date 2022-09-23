@@ -125,6 +125,7 @@ public class Server
 	    }
 	    
 	    public boolean checkUser(String username, String password) {
+	    	// TODO: checker si l'utilisateur est good mais pas password alors erreur
 	    	if(database.containsKey(username)) {
 	    		if(database.get(username).equals(password)) {
 	    			return true;
@@ -169,7 +170,6 @@ public class Server
 	                FileWriter fw = new FileWriter("database.txt",true);
 	                PrintWriter sortie = new PrintWriter(fw);
 
-	                // Append the name of ocean to the file
 	                sortie.println("\n" + username + "," + password);
 	                fw.close();
 	            }
