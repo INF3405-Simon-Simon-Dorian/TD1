@@ -1,4 +1,7 @@
 import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.*;
 import java.util.*;
 
@@ -153,17 +156,24 @@ public class Server
                     line = bf.readLine();
                 }
                 
-                bf.close();
+	            bf.close();
 	               
 	            String username = in.readUTF();
 	            String password = in.readUTF();
 	            
 	            if(checkUser(username, password))
 	            	out.writeUTF("Tu as bien un compte");
-	            else
-	            	out.writeUTF("Tu es nouveau");
+	            else {
+	            	out.writeUTF("Tu es nouveau, nous allons te créer un comptes");
+	            	// Open the file in append mode.
+	                FileWriter fw = new FileWriter("database.txt",true);
+	                PrintWriter sortie = new PrintWriter(fw);
 
-	            
+	                // Append the name of ocean to the file
+	                sortie.println("\n" + username + "," + password);
+	                fw.close();
+	            }
+	           
 	        }
 	        catch (IOException e)
 	        {
