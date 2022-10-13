@@ -1,11 +1,56 @@
 import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.*;
+import java.util.*;
+
 
 public class Server
 {
 	private static ServerSocket listener;
 	
+	static boolean portGood = false;
+	static boolean IPGood = false;
+
 	// Application Serveur
+	
+	static String askIP(Scanner scan) {
+		System.out.println("Veuillez entrer une addresse IP:");
+		
+		String IP = scan.nextLine();
+		int count = 0;
+		String[] str = IP.split("\\.");
+		
+		if(str.length != 4) {
+			return "0.0.0.0";
+		}
+		for(String a: str) {
+			int octet = Integer.valueOf(a);
+			
+			if(octet < 255 && octet > 0){
+				count++;
+				if(count == 4) {
+					System.out.println(IP);
+					IPGood = true;
+					return IP;
+				}
+			}
+		}
+		return "0.0.0.0";
+	}
+	
+	static int askPort(Scanner scan){
+		System.out.println("Veuillez entrer un port entre 5000 et 5050:");
+		int port = Integer.valueOf(scan.nextLine());
+		if(port >= 5000 && port <= 5050) {
+			System.out.println(port);
+			portGood = true;
+			return port;
+		}
+		askPort(scan);
+		return 0;
+	}
 	
 	public static void main(String[] args) throws Exception
 	{
@@ -20,9 +65,20 @@ public class Server
 		
 		// Création d'une connexion avec les clients
 		
+		Scanner scanner = new Scanner(System.in);
+
+		while(!IPGood) {
+			serverAddress = askIP(scanner);
+		}
+
+		while(!portGood) {
+			serverPort = askPort(scanner);
+		}
+		
 		listener = new ServerSocket();
 		listener.setReuseAddress(true);
 		InetAddress serverIP = InetAddress.getByName(serverAddress);
+		
 		
 		// Association de l'adresse et du port
 		
@@ -53,7 +109,11 @@ public class Server
 	{
 	    private Socket socket;
 	    private int clientNumber;
-	    
+		// creer un hashmap pour les usernames / mdp
+		
+		HashMap<String, String> clientData = new HashMap<String, String>();
+        HashMap<String, String> database = new HashMap<String, String>();
+		
 	    public ClientHandler(Socket socket, int clientNumber)
 	    {
 	        this.socket = socket;
@@ -61,6 +121,17 @@ public class Server
 	        
 	        System.out.println("New connection with client#" + clientNumber + " at" + socket);
 	        
+	        
+	    }
+	    
+	    public boolean checkUser(String username, String password) {
+	    	// TODO: checker si l'utilisateur est good mais pas password alors erreur
+	    	if(database.containsKey(username)) {
+	    		if(database.get(username).equals(password)) {
+	    			return true;
+	    		}
+	    	}
+	    	return false;
 	    }
 	    
 	    public void run()
@@ -68,14 +139,40 @@ public class Server
 	        try
 	        {
 	            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+	            DataInputStream in = new DataInputStream(socket.getInputStream());
 	            
 	            out.writeUTF("Hello from server - you are client#" + clientNumber);
-	            out.writeUTF("20");
-	            for(int i = 0; i < 20; i++) {
-	            	out.writeUTF("Dodo just hacked you !");
+	            
+	            // TODO: creer le fichier si non-existant
+	            BufferedReader bf = new BufferedReader(new FileReader("database.txt"));
+               
+                // read entire line as string
+                String line = bf.readLine();
+               
+                // checking for end of file
+                while (line != null) {
+                	String[] arr = line.split(",");
+                	database.put(arr[0], arr[1]);
+                    line = bf.readLine();
+                }
+                
+	            bf.close();
+	               
+	            String username = in.readUTF();
+	            String password = in.readUTF();
+	            
+	            if(checkUser(username, password))
+	            	out.writeUTF("Tu as bien un compte");
+	            else {
+	            	out.writeUTF("Tu es nouveau, nous allons te créer un comptes");
+	            	// Open the file in append mode.
+	                FileWriter fw = new FileWriter("database.txt",true);
+	                PrintWriter sortie = new PrintWriter(fw);
+
+	                sortie.println("\n" + username + "," + password);
+	                fw.close();
 	            }
-	            
-	            
+	           
 	        }
 	        catch (IOException e)
 	        {
