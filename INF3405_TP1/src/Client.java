@@ -12,6 +12,8 @@ public class Client
 {
 	static boolean portGood = false;
 	static boolean IPGood = false;
+	static boolean nomImageGood = false;
+	static boolean nomNewImageGood = false;
 	
 	private static Socket socket;
 	
@@ -67,12 +69,16 @@ public class Client
 	static String askImage(Scanner scan) {
 		System.out.println("Veuillez rentrer le nom de l'image à traiter:");
 		String imageName = scan.nextLine();
+		if (imageName.split("\\.").length == 2)
+			nomImageGood = true;
 		return imageName;
 	}
 	
 	static String askNewImageName(Scanner scan) {
 		System.out.println("Quel nom voulez-vous donner à la nouvelle image ?");
 		String newImageName = scan.nextLine();
+		if (newImageName.split("\\.").length == 2)
+			nomNewImageGood = true;
 		return newImageName;
 	}
 	
@@ -128,6 +134,8 @@ public class Client
 		
 		String username = "";
 		String password = "";
+		String imageName = "";
+		String newImageName = "";
 
 		// On demande à l'utilisateur l'adresse IP et le port tant qu'ils ne sont pas corrects
 		while(!IPGood) {
@@ -171,9 +179,12 @@ public class Client
 		
 		// Sinon, on lui demande l'image à traiter
 		
-		String imageName = askImage(scanner);
-		System.out.println(imageName);
-		String newImageName = askNewImageName(scanner);
+		while(!nomImageGood) {
+			imageName = askImage(scanner);
+		}
+		while(!nomNewImageGood) {
+			newImageName = askNewImageName(scanner);
+		}
 		
 		out.writeUTF(imageName);
 		sendImage(out, imageName);
