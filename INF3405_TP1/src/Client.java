@@ -1,6 +1,10 @@
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+
+import javax.imageio.ImageIO;
 
 public class Client
 {
@@ -58,34 +62,71 @@ public class Client
 		return password;
 	}
 	
+	static String askImage(Scanner scan) {
+		System.out.println("Veuillez rentrer le nom de l'image à traiter: \n");
+		String imageName = scan.nextLine();
+		return imageName;
+	}
+	
+	static String askNewImageName(Scanner scan) {
+		System.out.println("Quel nom voulez-vous donner à la nouvelle image ? \n");
+		String newImageName = scan.nextLine();
+		return newImageName;
+	}
+	
+	static boolean checkConnexionMessage(String message) {
+		if (message.equals("Connexion échouée"))
+			return false;
+		return true;
+	}
+	
+	static void sendImage(DataOutputStream out, String imageName) throws IOException {
+		try {
+			BufferedImage image = ImageIO.read(new File(imageName + ".jpg"));
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	        ImageIO.write(image, "jpg", byteArrayOutputStream);
+	        byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+	        out.write(size);
+	        out.write(byteArrayOutputStream.toByteArray());
+	        // out.flush();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+	}
+	
+	static void receiveImage(DataInputStream in, String newImageName) throws IOException {
+    	byte[] sizeAr = new byte[4];
+        in.read(sizeAr);
+        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+
+        byte[] imageAr = new byte[size];
+        in.read(imageAr);
+
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
+        BufferedImage imageSobel = Sobel.process(image);
+
+        ImageIO.write(imageSobel, "jpg", new File(newImageName + ".jpg"));
+    }
 	
 	public static void main(String[] args) throws Exception
 	{
 		
-		//Objet scanner
 		Scanner scanner = new Scanner(System.in);
-		
-		// Adresse et port du serveur
 		
 		String serverAddress = "0.0.0.0";
 		int serverPort = 5000;
 		
-		// username et pw
 		
 		String username = "";
 		String password = "";
 
-		
-		// demander ux sont IP/port
+		// On demande à l'utilisateur l'adresse IP et le port tant qu'ils ne sont pas corrects
 		while(!IPGood) {
 			serverAddress = askIP(scanner);
 		}
-		
 		while(!portGood) {
 			serverPort = askPort(scanner);
 		}
-		
-		// demander username + pw
 		
 		username = askUsername(scanner);
 		password = askPassword(scanner);
@@ -112,6 +153,20 @@ public class Client
 		String connexionMessage = in.readUTF();
 		System.out.println(connexionMessage);
 		
+		// Si le mot de passe est mauvais, on déconnecte le client
+		
+		if (!checkConnexionMessage(connexionMessage)) {
+			socket.close();
+			return;
+		}
+		
+		// Sinon, on lui demande l'image à traiter
+		
+		String imageName = askImage(scanner);
+		String newImageName = askNewImageName(scanner);
+		
+		sendImage(out, imageName);
+		receiveImage(in, newImageName);
 		
 		// Fermeture de la connexion avec le serveur
 		

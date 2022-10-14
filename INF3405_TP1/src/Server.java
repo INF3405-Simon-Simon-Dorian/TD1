@@ -1,10 +1,10 @@
 import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.ByteBuffer;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 
+import javax.imageio.ImageIO;
 
 public class Server
 {
@@ -111,7 +111,7 @@ public class Server
 	    private int clientNumber;
 		// creer un hashmap pour les usernames / mdp
 		
-		HashMap<String, String> clientData = new HashMap<String, String>();
+		// HashMap<String, String> clientData = new HashMap<String, String>();
         HashMap<String, String> database = new HashMap<String, String>();
 		
 	    public ClientHandler(Socket socket, int clientNumber)
@@ -124,15 +124,45 @@ public class Server
 	        
 	    }
 	    
-	    public boolean checkUser(String username, String password) {
-	    	// TODO: checker si l'utilisateur est good mais pas password alors erreur
+	    public boolean checkUsername(String username, String password) {
 	    	if(database.containsKey(username)) {
-	    		if(database.get(username).equals(password)) {
-	    			return true;
-	    		}
+	    		return true;
 	    	}
 	    	return false;
 	    }
+	    
+	    public boolean checkPassword(String username, String password) {
+			if(database.get(username).equals(password)) {
+				return true;
+			}
+	    	return false;
+	    }
+	    
+	    public BufferedImage processImage(DataInputStream in) throws IOException {
+	    	byte[] sizeAr = new byte[4];
+	        in.read(sizeAr);
+	        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+
+	        byte[] imageAr = new byte[size];
+	        in.read(imageAr);
+
+	        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
+	        BufferedImage imageSobel = Sobel.process(image);
+	        
+	        return imageSobel;
+	    }
+	    
+	    static void sendNewImage(DataOutputStream out, BufferedImage image) throws IOException {
+			try {
+				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		        ImageIO.write(image, "jpg", byteArrayOutputStream);
+		        byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+		        out.write(size);
+		        out.write(byteArrayOutputStream.toByteArray());
+	        } catch (IOException ioe) {
+	            ioe.printStackTrace();
+	        }
+		}
 	    
 	    public void run()
 	    {
@@ -162,8 +192,12 @@ public class Server
 	            String username = in.readUTF();
 	            String password = in.readUTF();
 	            
-	            if(checkUser(username, password))
-	            	out.writeUTF("Tu as bien un compte");
+	            if(checkUsername(username, password) && checkPassword(username, password))
+	            	out.writeUTF("Connexion réussie");
+	            else if (checkUsername(username, password) && !checkPassword(username, password)) {
+	            	out.writeUTF("Connexion échouée");
+	            	socket.close();
+	            }
 	            else {
 	            	out.writeUTF("Tu es nouveau, nous allons te créer un comptes");
 	            	// Open the file in append mode.
@@ -173,6 +207,9 @@ public class Server
 	                sortie.println("\n" + username + "," + password);
 	                fw.close();
 	            }
+	            
+	            BufferedImage imageToSend = processImage(in);
+	            sendNewImage(out, imageToSend);
 	           
 	        }
 	        catch (IOException e)
