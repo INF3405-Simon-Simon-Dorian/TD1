@@ -33,7 +33,6 @@ public class Server
 			if(octet < 255 && octet > 0){
 				count++;
 				if(count == 4) {
-					System.out.println(IP);
 					IPGood = true;
 					return IP;
 				}
@@ -46,7 +45,6 @@ public class Server
 		System.out.println("Veuillez entrer un port entre 5000 et 5050:");
 		int port = Integer.valueOf(scan.nextLine());
 		if(port >= 5000 && port <= 5050) {
-			System.out.println(port);
 			portGood = true;
 			return port;
 		}
@@ -111,9 +109,6 @@ public class Server
 	{
 	    private Socket socket;
 	    private int clientNumber;
-		// creer un hashmap pour les usernames / mdp
-		
-		// HashMap<String, String> clientData = new HashMap<String, String>();
         HashMap<String, String> database = new HashMap<String, String>();
 		
 	    public ClientHandler(Socket socket, int clientNumber)
@@ -122,7 +117,6 @@ public class Server
 	        this.clientNumber = clientNumber;
 	        
 	        System.out.println("New connection with client#" + clientNumber + " at" + socket);
-	        
 	        
 	    }
 	    
