@@ -84,7 +84,7 @@ public class Client
 	
 	static void sendImage(DataOutputStream out, String imageName) throws IOException {
 		try {
-			String extensionImage = imageName.split(".")[1];
+			String extensionImage = imageName.split("\\.")[1];
 			BufferedImage image = ImageIO.read(new File(imageName));
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 	        ImageIO.write(image, extensionImage, byteArrayOutputStream);
@@ -98,7 +98,7 @@ public class Client
 	}
 	
 	static void receiveImage(DataInputStream in, String newImageName) throws IOException {
-		String extensionImage = newImageName.split(".")[1];
+		String extensionImage = newImageName.split("\\.")[1];
     	byte[] sizeAr = new byte[4];
         in.read(sizeAr);
         int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
@@ -113,7 +113,7 @@ public class Client
     }
 	
 	static Path getImagePath(String imageName) {
-		Path path = Paths.get(imageName + ".jpg");
+		Path path = Paths.get(imageName);
 		return path.toAbsolutePath();
 	}
 	
@@ -172,6 +172,7 @@ public class Client
 		// Sinon, on lui demande l'image à traiter
 		
 		String imageName = askImage(scanner);
+		System.out.println(imageName);
 		String newImageName = askNewImageName(scanner);
 		
 		sendImage(out, imageName);
