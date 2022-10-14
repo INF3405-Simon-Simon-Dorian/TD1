@@ -1,5 +1,7 @@
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -51,25 +53,25 @@ public class Client
 	}
 	
 	static String askUsername(Scanner scan) {
-		System.out.println("Veuillez rentrer votre nom d'utilisateur: ");
+		System.out.println("Veuillez rentrer votre nom d'utilisateur:");
 		String username = scan.nextLine();
 		return username;
 	}
 	
 	static String askPassword(Scanner scan) {
-		System.out.println("Veuillez rentrer votre mot de passe: \n");
+		System.out.println("Veuillez rentrer votre mot de passe:");
 		String password = scan.nextLine();
 		return password;
 	}
 	
 	static String askImage(Scanner scan) {
-		System.out.println("Veuillez rentrer le nom de l'image à traiter: \n");
+		System.out.println("Veuillez rentrer le nom de l'image à traiter:");
 		String imageName = scan.nextLine();
 		return imageName;
 	}
 	
 	static String askNewImageName(Scanner scan) {
-		System.out.println("Quel nom voulez-vous donner à la nouvelle image ? \n");
+		System.out.println("Quel nom voulez-vous donner à la nouvelle image ?");
 		String newImageName = scan.nextLine();
 		return newImageName;
 	}
@@ -82,9 +84,10 @@ public class Client
 	
 	static void sendImage(DataOutputStream out, String imageName) throws IOException {
 		try {
-			BufferedImage image = ImageIO.read(new File(imageName + ".jpg"));
+			String extensionImage = imageName.split(".")[1];
+			BufferedImage image = ImageIO.read(new File(imageName));
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-	        ImageIO.write(image, "jpg", byteArrayOutputStream);
+	        ImageIO.write(image, extensionImage, byteArrayOutputStream);
 	        byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
 	        out.write(size);
 	        out.write(byteArrayOutputStream.toByteArray());
@@ -95,6 +98,7 @@ public class Client
 	}
 	
 	static void receiveImage(DataInputStream in, String newImageName) throws IOException {
+		String extensionImage = newImageName.split(".")[1];
     	byte[] sizeAr = new byte[4];
         in.read(sizeAr);
         int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
@@ -105,8 +109,13 @@ public class Client
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
         BufferedImage imageSobel = Sobel.process(image);
 
-        ImageIO.write(imageSobel, "jpg", new File(newImageName + ".jpg"));
+        ImageIO.write(imageSobel, extensionImage, new File(newImageName));
     }
+	
+	static Path getImagePath(String imageName) {
+		Path path = Paths.get(imageName + ".jpg");
+		return path.toAbsolutePath();
+	}
 	
 	public static void main(String[] args) throws Exception
 	{
@@ -166,7 +175,9 @@ public class Client
 		String newImageName = askNewImageName(scanner);
 		
 		sendImage(out, imageName);
+		System.out.println("L'image " + imageName + " a bien été envoyée pour le traitement.");
 		receiveImage(in, newImageName);
+		System.out.println("L'image traitée " + newImageName + " a bien été reçue.\nElle se trouve ici : " + getImagePath(newImageName));
 		
 		// Fermeture de la connexion avec le serveur
 		
