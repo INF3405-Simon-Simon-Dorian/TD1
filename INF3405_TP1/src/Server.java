@@ -175,8 +175,9 @@ public class Server
 	            
 	            out.writeUTF("Hello from server - you are client#" + clientNumber);
 
-	            
-	            // TODO: creer le fichier si non-existant
+	            File yourFile = new File("database.txt");
+                yourFile.createNewFile(); // if file already exists will do nothing 
+
 	            BufferedReader bf = new BufferedReader(new FileReader("database.txt"));
                
                 // read entire line as string
@@ -206,7 +207,7 @@ public class Server
 	                FileWriter fw = new FileWriter("database.txt",true);
 	                PrintWriter sortie = new PrintWriter(fw);
 
-	                sortie.println("\n" + username + "," + password);
+	                sortie.println(username + "," + password);
 	                fw.close();
 	            }
 	            
