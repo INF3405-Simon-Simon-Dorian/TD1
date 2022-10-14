@@ -1,5 +1,7 @@
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -208,6 +210,12 @@ public class Server
 	                fw.close();
 	            }
 	            
+	            String imageName = in.readUTF();
+	            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+	            LocalDateTime now = LocalDateTime.now();
+	            System.out.println("[" + username + " - " + socket.getLocalAddress()
+	            		+ ":" + socket.getPort() + " - " + dtf.format(now) +"] : Image "
+	            		+ imageName + " reçue pour traitement.");
 	            BufferedImage imageToSend = processImage(in);
 	            sendNewImage(out, imageToSend);
 	           

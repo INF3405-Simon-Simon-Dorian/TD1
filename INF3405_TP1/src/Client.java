@@ -175,6 +175,7 @@ public class Client
 		System.out.println(imageName);
 		String newImageName = askNewImageName(scanner);
 		
+		out.writeUTF(imageName);
 		sendImage(out, imageName);
 		System.out.println("L'image " + imageName + " a bien été envoyée pour le traitement.");
 		receiveImage(in, newImageName);
