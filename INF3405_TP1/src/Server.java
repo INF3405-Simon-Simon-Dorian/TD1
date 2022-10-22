@@ -135,26 +135,16 @@ public class Server
 	    }
 	    
 	    public BufferedImage processImage(DataInputStream in) throws IOException {
-	    	byte[] sizeAr = new byte[4];
-	        in.read(sizeAr);
-	        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
-
-	        byte[] imageAr = new byte[size];
-	        in.read(imageAr);
-
-	        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
+	    	socket.getOutputStream().flush();
+	    	BufferedImage image = ImageIO.read(socket.getInputStream());
 	        BufferedImage imageSobel = Sobel.process(image);
 	        
 	        return imageSobel;
 	    }
 	    
-	    static void sendNewImage(DataOutputStream out, BufferedImage image) throws IOException {
+	    public void sendNewImage(DataOutputStream out, BufferedImage image) throws IOException {
 			try {
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		        ImageIO.write(image, "jpg", byteArrayOutputStream);
-		        byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-		        out.write(size);
-		        out.write(byteArrayOutputStream.toByteArray());
+		        ImageIO.write(image, "jpg", socket.getOutputStream());
 	        } catch (IOException ioe) {
 	            ioe.printStackTrace();
 	        }
@@ -206,14 +196,15 @@ public class Server
 	            }
 	            
 	            String imageName = in.readUTF();
+	            String extensionImage = imageName.split("\\.")[1];
 	            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
 	            LocalDateTime now = LocalDateTime.now();
 	            System.out.println("[" + username + " - " + socket.getLocalAddress()
 	            		+ ":" + socket.getPort() + " - " + dtf.format(now) +"] : Image "
 	            		+ imageName + " reçue pour traitement.");
 	            BufferedImage imageToSend = processImage(in);
-	            sendNewImage(out, imageToSend);
-	           
+		        ImageIO.write(imageToSend, extensionImage, socket.getOutputStream());
+	       
 	        }
 	        catch (IOException e)
 	        {

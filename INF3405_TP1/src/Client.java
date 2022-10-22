@@ -90,11 +90,14 @@ public class Client
 		try {
 			String extensionImage = imageName.split("\\.")[1];
 			BufferedImage image = ImageIO.read(new File(imageName));
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-	        ImageIO.write(image, extensionImage, byteArrayOutputStream);
-	        byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-	        out.write(size);
-	        out.write(byteArrayOutputStream.toByteArray());
+			// ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	        // ImageIO.write(image, extensionImage, byteArrayOutputStream);
+	        // byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+	        // out.write(size);
+	        // out.write(byteArrayOutputStream.toByteArray());
+			socket.getOutputStream().flush();
+	        ImageIO.write(image, extensionImage, socket.getOutputStream());
+	        socket.getOutputStream().flush();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -102,17 +105,10 @@ public class Client
 	
 	static void receiveImage(DataInputStream in, String newImageName) throws IOException {
 		String extensionImage = newImageName.split("\\.")[1];
-    	byte[] sizeAr = new byte[4];
-        in.read(sizeAr);
-        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+        
+		BufferedImage imageNew = ImageIO.read(socket.getInputStream());
 
-        byte[] imageAr = new byte[size];
-        in.read(imageAr);
-
-        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
-        BufferedImage imageSobel = Sobel.process(image);
-
-        ImageIO.write(imageSobel, extensionImage, new File(newImageName));
+        ImageIO.write(imageNew, extensionImage, new File(newImageName));
     }
 	
 	static Path getImagePath(String imageName) {
