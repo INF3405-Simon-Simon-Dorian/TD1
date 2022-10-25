@@ -91,7 +91,7 @@ public class Client
 			String extensionImage = imageName.split("\\.")[1];
 			BufferedImage image = ImageIO.read(new File(imageName));
 			socket.getOutputStream().flush();
-	        ImageIO.write(image, extensionImage, socket.getOutputStream());
+	        ImageIO.write(image, "png", socket.getOutputStream());
 	        socket.getOutputStream().flush();
         } catch (IOException ioe) {
             ioe.printStackTrace();
@@ -103,7 +103,7 @@ public class Client
 		socket.getOutputStream().flush();
 		BufferedImage imageNew = ImageIO.read(socket.getInputStream());
 
-        ImageIO.write(imageNew, extensionImage, new File(newImageName));
+        ImageIO.write(imageNew, "png", new File(newImageName));
     }
 	
 	static Path getImagePath(String imageName) {
