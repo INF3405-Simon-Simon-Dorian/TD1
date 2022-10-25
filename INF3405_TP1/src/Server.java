@@ -142,14 +142,6 @@ public class Server
 	        return imageSobel;
 	    }
 	    
-	    public void sendNewImage(DataOutputStream out, BufferedImage image) throws IOException {
-			try {
-		        ImageIO.write(image, "jpg", socket.getOutputStream());
-	        } catch (IOException ioe) {
-	            ioe.printStackTrace();
-	        }
-		}
-	    
 	    public void run()
 	    {
 	        try
@@ -202,8 +194,12 @@ public class Server
 	            System.out.println("[" + username + " - " + socket.getLocalAddress()
 	            		+ ":" + socket.getPort() + " - " + dtf.format(now) +"] : Image "
 	            		+ imageName + " reçue pour traitement.");
+	            
+	            // On récupère l'image et la traitons
 	            BufferedImage imageToSend = processImage(in);
-		        ImageIO.write(imageToSend, extensionImage, socket.getOutputStream());
+	            
+	            // On envoie l'image traitée
+		        ImageIO.write(imageToSend, "png", socket.getOutputStream());
 	       
 	        }
 	        catch (IOException e)

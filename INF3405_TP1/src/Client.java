@@ -65,7 +65,7 @@ public class Client
 	}
 	
 	static String askImage(Scanner scan) {
-		System.out.println("Veuillez rentrer le nom de l'image à traiter:");
+		System.out.println("Veuillez rentrer le nom de l'image à traiter (format : nom.extension):");
 		String imageName = scan.nextLine();
 		if (imageName.split("\\.").length == 2)
 			nomImageGood = true;
@@ -73,7 +73,7 @@ public class Client
 	}
 	
 	static String askNewImageName(Scanner scan) {
-		System.out.println("Quel nom voulez-vous donner à la nouvelle image ?");
+		System.out.println("Veuillez rentrer le nom de la nouvelle image (format : nom.extension):");
 		String newImageName = scan.nextLine();
 		if (newImageName.split("\\.").length == 2)
 			nomNewImageGood = true;
@@ -86,15 +86,10 @@ public class Client
 		return true;
 	}
 	
-	static void sendImage(DataOutputStream out, String imageName) throws IOException {
+	static void sendImage(String imageName) throws IOException {
 		try {
 			String extensionImage = imageName.split("\\.")[1];
 			BufferedImage image = ImageIO.read(new File(imageName));
-			// ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-	        // ImageIO.write(image, extensionImage, byteArrayOutputStream);
-	        // byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-	        // out.write(size);
-	        // out.write(byteArrayOutputStream.toByteArray());
 			socket.getOutputStream().flush();
 	        ImageIO.write(image, extensionImage, socket.getOutputStream());
 	        socket.getOutputStream().flush();
@@ -103,9 +98,9 @@ public class Client
         }
 	}
 	
-	static void receiveImage(DataInputStream in, String newImageName) throws IOException {
+	static void receiveImage(String newImageName) throws IOException {
 		String extensionImage = newImageName.split("\\.")[1];
-        
+		socket.getOutputStream().flush();
 		BufferedImage imageNew = ImageIO.read(socket.getInputStream());
 
         ImageIO.write(imageNew, extensionImage, new File(newImageName));
@@ -179,10 +174,13 @@ public class Client
 			newImageName = askNewImageName(scanner);
 		}
 		
+		// On envoie l'image à traiter
 		out.writeUTF(imageName);
-		sendImage(out, imageName);
+		sendImage(imageName);
 		System.out.println("L'image " + imageName + " a bien été envoyée pour le traitement.");
-		receiveImage(in, newImageName);
+		
+		// On récupère l'image traitée
+		receiveImage(newImageName);
 		System.out.println("L'image traitée " + newImageName + " a bien été reçue.\nElle se trouve ici : " + getImagePath(newImageName));
 		
 		// Fermeture de la connexion avec le serveur
